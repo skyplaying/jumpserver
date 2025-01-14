@@ -1,3 +1,5 @@
+from django.db.models import TextChoices
+
 from .base import BaseType
 
 
@@ -37,6 +39,7 @@ class DatabaseTypes(BaseType):
                 'verify_account_enabled': True,
                 'change_secret_enabled': True,
                 'push_account_enabled': True,
+                'remove_account_enabled': True,
             },
             cls.REDIS: {
                 'ansible_enabled': False,
@@ -116,5 +119,13 @@ class DatabaseTypes(BaseType):
     @classmethod
     def get_community_types(cls):
         return [
-            cls.MYSQL, cls.MARIADB, cls.MONGODB, cls.REDIS
+            cls.MYSQL, cls.MARIADB, cls.POSTGRESQL,
+            cls.MONGODB, cls.REDIS,
         ]
+
+
+class PostgresqlSSLMode(TextChoices):
+    PREFER = 'prefer', 'Prefer'
+    REQUIRE = 'require', 'Require'
+    VERIFY_CA = 'verify-ca', 'Verify CA'
+    VERIFY_FULL = 'verify-full', 'Verify Full'

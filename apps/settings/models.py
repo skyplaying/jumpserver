@@ -7,9 +7,11 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.db.utils import ProgrammingError, OperationalError
 from django.utils.translation import gettext_lazy as _
+from rest_framework.utils.encoders import JSONEncoder
 
 from common.db.models import JMSBaseModel
 from common.utils import signer, get_logger
+from .signals import setting_changed
 
 logger = get_logger(__name__)
 
@@ -62,7 +64,7 @@ class Setting(models.Model):
     @cleaned_value.setter
     def cleaned_value(self, item):
         try:
-            v = json.dumps(item)
+            v = json.dumps(item, cls=JSONEncoder)
             if self.encrypted:
                 v = signer.sign(v)
             self.value = v
@@ -84,6 +86,7 @@ class Setting(models.Model):
         if not item:
             return
         item.refresh_setting()
+        setting_changed.send(sender=cls, name=name, item=item)
 
     def refresh_setting(self):
         setattr(settings, self.name, self.cleaned_value)
